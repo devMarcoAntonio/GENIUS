@@ -1,6 +1,8 @@
 let order=[];
 let clickedOrder = [];
 let score = 0;
+let level = 1;
+let lose = false;
 
 // 0 = verde
 // 1 = vermelho
@@ -12,24 +14,32 @@ const red = document.querySelector('.red');
 const green = document.querySelector('.green');
 const yellow = document.querySelector('.yellow');
 
+const nivel = document.getElementById('nivel');
+const pontos = document.getElementById('pontos');
+
 //cria ordem aleatória de cores
 let shuffleOrder = () => {
+    //variavel para guardar o numero à cada rodada
     let colorOrder = Math.floor(Math.random() * 4);
+    //atribui o valor na próxima poxição do array order
     order[order.length] = colorOrder;
+    //click continua vazio
     clickedOrder = [];
 
+    //acende o numero sorteado
     for (let i in order) {
         let  elementColor = createColorElement(order[i]);
-        lightColor(elementColor, Number(i) + 1);
+        lightColor(order[i], elementColor, Number(i) + 1);
     }
 }
 
 //acende a próxima cor
-let lightColor = (element, number) => {
-    number = number * 500;
+let lightColor = (color, element, number) => {
+    number = number * 700;
     setTimeout(() => {
         element.classList.add('selected');
-    }, number - 250);
+        soundColorPlay(color);
+    }, number - 450);
     setTimeout(() => {
         element.classList.remove('selected');
     });
@@ -39,13 +49,21 @@ let lightColor = (element, number) => {
 let checkOrder = () => {
     for (let i in clickedOrder) {
         if (clickedOrder[i] != order[i]) {
+            lose = true;
             gameOver();
             break;
         }
     }
-    if(clickedOrder.lenght == order.leght){
-        alert (`Pontuação: ${score}\nVocê ganhou!iniciando proximo nivel!`);
-        nextLevel();
+    if(clickedOrder.lenght == order.leght && lose == false){
+        score++;
+        
+        //alert (`Pontuação: ${score}\nVocê ganhou!iniciando proximo nivel!`);
+        scoreTela(score);
+        levelTela(score);
+        setTimeout(() =>{
+            nextLevel();
+        }, 2000);
+       
     }
 }
 
@@ -53,13 +71,12 @@ let checkOrder = () => {
 let click = (color) => {
     clickedOrder[clickedOrder.length] = color;
     createColorElement(color).classList.add('selected');
+    soundColorPlay(color);
 
     setTimeout(() => {
         createColorElement(color).classList.remove('selected');
         checkOrder();
-    },250);
-
-   
+    }, 450);   
 }
 
 //função retorna a cor do elemento
@@ -74,24 +91,48 @@ let createColorElement = (color) => {
         return blue;
     }
 }
+
 //função para próximo nível do jogo
 let nextLevel = () =>{
-    score++;
+    //score++;
     shuffleOrder();
 
 }
 
 //função para game over
 let gameOver = () => {
-    alert ('Pontuação: $(score)\nVocê perdeu!iniciando novo jogo!');
+    //soundErrorPlay()
+    //alert ('Pontuação: $(score)\nVocê perdeu!iniciando novo jogo!');
+    Swal.fire({
+        type: 'error',
+        title: 'Você perdeu o jogo!',
+        text: 'Sua pontuação: ${score}!\n\nClique em jogar para iniciar o jogo!',
+        onOpen: () => {
+            soundErrorPlay();
+        }
+    });
     order = [];
     clickedOrder = [];
 
-    playGame();
+    //playGame();
 }
+
 //função de inicio do jogo
 let playGame = () => {
-    alert('Bem vindo ao Genesis \n iniciando novo jogo');
+    //se der problema mudar para minusculo o Event
+    Event.preventDefault();
+
+    score = 0;
+    lose = false;
+
+    scoreTela(score);
+    levelTela(score);
+
+    //alert('Bem vindo ao Genesis \n iniciando novo jogo');
+    Swal.fire({
+        //parei aqui
+
+    });
     score = 0;
 
     nextLevel();    
